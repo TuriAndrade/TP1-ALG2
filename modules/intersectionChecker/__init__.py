@@ -1,0 +1,1 @@
+from .intersectionChecker import IntersectionChecker
