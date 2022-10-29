@@ -5,25 +5,25 @@ from typing import Any, List
 
 class AVLTree:
     def __init__(self) -> None:
-        self.root: AVLNode = None
+        self.__root: AVLNode = None
 
     @staticmethod
     def LT(key1: Any, key2: Any, compare: Any) -> bool:
-        if(compare is None):
+        if (compare is None):
             return key1 < key2
         else:
             return compare(key1, key2) == -1
 
     @staticmethod
     def GT(key1: Any, key2: Any, compare: Any) -> bool:
-        if(compare is None):
+        if (compare is None):
             return key1 > key2
         else:
             return compare(key1, key2) == 1
 
     @staticmethod
     def EQ(key1: Any, key2: Any, compare: Any) -> bool:
-        if(compare is None):
+        if (compare is None):
             return key1 == key2
         else:
             return compare(key1, key2) == 0
@@ -34,7 +34,7 @@ class AVLTree:
             return AVLNode(key)
         elif self.LT(key, root.getKey(), compare):
             root.setLeft(self.insertHelper(root.getLeft(), key, compare))
-        elif(self.GT(key, root.getKey(), compare)):
+        elif (self.GT(key, root.getKey(), compare)):
             root.setRight(self.insertHelper(root.getRight(), key, compare))
         else:
             return root
@@ -61,7 +61,7 @@ class AVLTree:
         return root
 
     def insert(self, key: Any, compare: Any = None) -> None:
-        self.root = self.insertHelper(self.root, key, compare)
+        self.__root = self.insertHelper(self.__root, key, compare)
 
     def deleteHelper(self, root: AVLNode, key: Any, compare: Any = None) -> AVLNode:
 
@@ -116,7 +116,7 @@ class AVLTree:
         return root
 
     def delete(self, key: Any, compare: Any = None) -> None:
-        self.root = self.deleteHelper(self.root, key, compare)
+        self.__root = self.deleteHelper(self.__root, key, compare)
 
     def leftRotate(self, z: AVLNode) -> AVLNode:
 
@@ -179,7 +179,7 @@ class AVLTree:
 
     def inOrder(self) -> List[Any]:
         nodes = []
-        self.inOrderHelper(self.root, nodes)
+        self.inOrderHelper(self.__root, nodes)
         return nodes
 
     def getRightmost(self, root: AVLNode) -> AVLNode:
@@ -201,10 +201,10 @@ class AVLTree:
             self.printHelper(currPtr.getRight(), indent, True)
 
     def print(self) -> None:
-        self.printHelper(self.root, "", True)
+        self.printHelper(self.__root, "", True)
 
     def findHelper(self, root: AVLNode, key: Any, compare: Any = None) -> AVLNode:
-        if((root is None) or ((root.getKey() == key) if (compare is None) else (compare(key, root.getKey()) == 0))):
+        if ((root is None) or ((root.getKey() == key) if (compare is None) else (compare(key, root.getKey()) == 0))):
             return root
 
         elif (((key < root.getKey()) if (compare is None) else (compare(key, root.getKey()) == -1))):
@@ -214,13 +214,13 @@ class AVLTree:
             return self.findHelper(root.getRight(), key, compare)
 
     def find(self, key: Any, compare: Any = None) -> AVLNode:
-        return self.findHelper(self.root, key, compare)
+        return self.findHelper(self.__root, key, compare)
 
     def inOrderSuccessorHelper(self, root: AVLNode, successor: AVLNode, key: Any, compare: Any = None) -> AVLNode:
-        if((root is None)):
+        if ((root is None)):
             return root
 
-        elif((root.getKey() == key) if (compare is None) else (compare(key, root.getKey()) == 0)):
+        elif ((root.getKey() == key) if (compare is None) else (compare(key, root.getKey()) == 0)):
             return successor
 
         elif (((key < root.getKey()) if (compare is None) else (compare(key, root.getKey()) == -1))):
@@ -231,30 +231,30 @@ class AVLTree:
             return self.inOrderSuccessorHelper(root.getRight(), successor, key, compare)
 
     def inOrderSuccessor(self, key: Any, compare: Any = None) -> AVLNode:
-        return self.inOrderSuccessorHelper(self.root, None, key, compare)
+        return self.inOrderSuccessorHelper(self.__root, None, key, compare)
 
     def successor(self, key: Any, compare: Any = None) -> Any:
         node: AVLNode = self.find(key, compare)
 
-        if(node is None):
+        if (node is None):
             return node
 
-        elif(node.getRight() is not None):
+        elif (node.getRight() is not None):
             successor = self.getLeftmost(node.getRight())
 
         else:
             successor = self.inOrderSuccessor(key, compare)
 
-        if(successor is not None):
+        if (successor is not None):
             return successor.getKey()
         else:
             return None
 
     def inOrderPredecessorHelper(self, root: AVLNode, predecessor: AVLNode, key: Any, compare: Any = None) -> AVLNode:
-        if((root is None)):
+        if ((root is None)):
             return root
 
-        elif((root.getKey() == key) if (compare is None) else (compare(key, root.getKey()) == 0)):
+        elif ((root.getKey() == key) if (compare is None) else (compare(key, root.getKey()) == 0)):
             return predecessor
 
         elif (((key < root.getKey()) if (compare is None) else (compare(key, root.getKey()) == -1))):
@@ -265,21 +265,21 @@ class AVLTree:
             return self.inOrderPredecessorHelper(root.getRight(), predecessor, key, compare)
 
     def inOrderPredecessor(self, key: Any, compare: Any = None) -> AVLNode:
-        return self.inOrderPredecessorHelper(self.root, None, key, compare)
+        return self.inOrderPredecessorHelper(self.__root, None, key, compare)
 
     def predecessor(self, key: Any, compare: Any = None) -> Any:
         node: AVLNode = self.find(key, compare)
 
-        if(node is None):
+        if (node is None):
             return node
 
-        elif(node.getLeft() is not None):
+        elif (node.getLeft() is not None):
             predecessor = self.getRightmost(node.getLeft())
 
         else:
             predecessor = self.inOrderPredecessor(key, compare)
 
-        if(predecessor is not None):
+        if (predecessor is not None):
             return predecessor.getKey()
         else:
             return None

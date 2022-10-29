@@ -4,6 +4,7 @@ from ..quicksort import quicksort
 from ..stack import Stack
 from utils.exception import errorAssert
 from typing import List
+import numpy as np
 
 
 class ConvexHull2D:
@@ -15,57 +16,89 @@ class ConvexHull2D:
         errorAssert((coordinate1 < points[0].getDim()) and (
             coordinate2 < points[0].getDim()), "Invalid coordinates.")
 
-        self.points: List[Point] = list(set(points))
+        self.__coordinate1 = coordinate1
+        self.__coordinate2 = coordinate2
 
-        self.nPoints: int = len(self.points)
+        self.__points: List[Point] = []
 
-        self.coordinate1 = coordinate1
-        self.coordinate2 = coordinate2
+        self.__nPoints: int = 0
 
-        self.hull: List[Point] = []
+        self.getPoints(points)
+
+        errorAssert(self.__nPoints > 2, "Invalid number of different points.")
+
+        self.__hull: List[Point] = []
 
         self.build()
 
-    def build(self) -> None:
-        p0: Point = self.points[0]
+    def getPoints(self, points: List[Point]) -> None:
+        for point in points:
+            coordinates = [
+                point.getCoordinate(self.__coordinate1),
+                point.getCoordinate(self.__coordinate2)
+            ]
 
-        for i in range(1, self.nPoints):
-            if(p0.compare(self.points[i], 0) == -1):
-                p0 = self.points[i]
+            self.__points.append(Point(
+                np.array(coordinates)
+            ))
+
+        self.__points = list(set(self.__points))
+        self.__nPoints = len(self.__points)
+
+    def removeCollinearPoints(self) -> None:
+        count = 1
+        for i in range(1, self.__nPoints):
+
+            while ((i < self.__nPoints - 1) and
+                   (Segment.direction2D(
+                    0, 1,
+                    Segment(self.__points[0], self.__points[i]),
+                    Segment(self.__points[i], self.__points[i+1])) == 0)
+                   ):
+                i += 1
+
+            self.__points[count] = self.__points[i]
+            count += 1
+
+        self.__points = self.__points[:count]
+        self.__nPoints = count
+
+    def build(self) -> None:
+        p0: Point = self.__points[0]
+
+        for i in range(1, self.__nPoints):
+            if (p0.compare(self.__points[i], 1) == 1):
+                p0 = self.__points[i]
 
         quicksort(
-            self.points, 0, self.nPoints - 1,
-            Segment.buildSegmentsComparison(0, 1, p0)
+            self.__points, 0, self.__nPoints - 1,
+            Segment.buildSegmentsComparison(
+                0, 1, p0)
         )
+
+        self.removeCollinearPoints()
+        errorAssert(self.__nPoints > 2,
+                    "Invalid number of non-collinear points.")
 
         pointStack = Stack()
 
-        pointStack.push(self.points[0])
-        pointStack.push(self.points[1])
-        pointStack.push(self.points[2])
+        pointStack.push(self.__points[0])
+        pointStack.push(self.__points[1])
+        pointStack.push(self.__points[2])
 
-        for i in range(3, self.nPoints):
-            top = pointStack.getNode(1)
-            nextToTop = pointStack.getNode(2)
+        for i in range(3, self.__nPoints):
 
-            segment1 = Segment(nextToTop, top)
-            segment2 = Segment(top, self.points[i])
-
-            while(Segment.direction2D(0, 1, segment1, segment2) < 0):
+            while (
+                (pointStack.getSize() > 1) and
+                (Segment.direction2D(
+                    0, 1,
+                    Segment(pointStack.getNode(2), pointStack.getNode(1)),
+                    Segment(pointStack.getNode(1), self.__points[i])) != 1)
+            ):
                 pointStack.pop()
+            pointStack.push(self.__points[i])
 
-                if(pointStack.getSize() <= 1):
-                    break
-
-                top = pointStack.getNode(1)
-                nextToTop = pointStack.getNode(2)
-
-                segment1 = Segment(nextToTop, top)
-                segment2 = Segment(top, self.points[i])
-
-            pointStack.push(self.points[i])
-
-        self.hull = pointStack.toList()
+        self.__hull = pointStack.toList()
 
     def getHull(self) -> List[Point]:
-        return self.hull
+        return self.__hull

@@ -4,37 +4,37 @@ from typing import Any, List
 
 class Stack:
     def __init__(self) -> None:
-        self.first: StackNode = None
-        self.size: int = 0
+        self.__first: StackNode = None
+        self.__size: int = 0
 
     def push(self, data: Any) -> None:
         node = StackNode(data)
-        node.setNext(self.first)
-        self.first = node
-        self.size += 1
+        node.setNext(self.__first)
+        self.__first = node
+        self.__size += 1
 
     def pop(self) -> Any:
-        if(self.size == 0):
+        if (self.__size == 0):
             return None
 
-        node = self.first
-        self.first = self.first.getNext()
-        self.size -= 1
+        node = self.__first
+        self.__first = self.__first.getNext()
+        self.__size -= 1
 
         return node.getData()
 
     def isEmpty(self) -> bool:
-        return self.size == 0
+        return self.__size == 0
 
     def getSize(self) -> int:
-        return self.size
+        return self.__size
 
     def toList(self) -> List[Any]:
-        if(self.isEmpty()):
+        if (self.isEmpty()):
             return []
 
         stackToList: List[Any] = []
-        while(not self.isEmpty()):
+        while (not self.isEmpty()):
             data: Any = self.pop()
             stackToList.append(data)
 
@@ -42,9 +42,9 @@ class Stack:
 
     def getNode(self, n) -> Any:
         i: int = 1
-        current: StackNode = self.first
+        current: StackNode = self.__first
 
-        while((i < n) and (current is not None)):
+        while ((i < n) and (current is not None)):
             current = current.getNext()
             i += 1
 

@@ -12,8 +12,8 @@ class Segment:
         errorAssert(p1.getDim() == p2.getDim(),
                     "Points of different dimensions.")
 
-        self.points: List[Point] = [p1, p2]
-        self.dim = p1.getDim()
+        self.__points: List[Point] = [p1, p2]
+        self.__dim = p1.getDim()
 
     def __eq__(self, segment: Segment) -> bool:
         return (
@@ -28,26 +28,26 @@ class Segment:
         )
 
     def getDim(self) -> int:
-        return self.dim
+        return self.__dim
 
     def getPoint(self, index: int) -> Point:
         errorAssert(index == 0 or index == 1, "Invalid index.")
 
-        return self.points[index]
+        return self.__points[index]
 
     def getPointCoordinate(self, index: int, coordinate: int) -> np.float32:
-        errorAssert(coordinate < self.dim, "Invalid coordinates")
+        errorAssert(coordinate < self.__dim, "Invalid coordinates")
         errorAssert(index == 0 or index == 1, "Invalid index.")
 
-        return self.points[index].getCoordinate(coordinate)
+        return self.__points[index].getCoordinate(coordinate)
 
     def getPointCoordinates(self, index: int) -> NDArray:
         errorAssert(index == 0 or index == 1, "Invalid index.")
 
-        return self.points[index].getCoordinates()
+        return self.__points[index].getCoordinates()
 
     def computeLength(self) -> float:
-        return self.points[0].computeDist(self.points[1])
+        return self.__points[0].computeDist(self.__points[1])
 
     @staticmethod
     def buildSegmentsComparison(coordinate1: int, coordinate2: int, p0: Point) -> Any:
@@ -58,9 +58,9 @@ class Segment:
             d = Segment.direction2D(
                 coordinate1, coordinate2, segment1, segment2)
 
-            if(d == 1):
+            if (d == 1):
                 return True
-            elif(d == -1):
+            elif (d == -1):
                 return False
             else:
                 return segment1.computeLength() <= segment2.computeLength()
@@ -73,7 +73,7 @@ class Segment:
                     "Point and segment of different dimensions.")
 
         for i in range(segment.getDim()):
-            if(
+            if (
                 (point.getCoordinate(i) < min(segment.getPointCoordinate(0, i), segment.getPointCoordinate(1, i))) or
                 (point.getCoordinate(i) > max(segment.getPointCoordinate(
                     0, i), segment.getPointCoordinate(1, i)))
@@ -109,18 +109,18 @@ class Segment:
 
         vectorProduct = (
             (
-                p1.getCoordinate(coordinate1) *
-                p2.getCoordinate(coordinate2)
+                p1.getCoordinate(0) *
+                p2.getCoordinate(1)
             ) -
             (
-                p2.getCoordinate(coordinate1) *
-                p1.getCoordinate(coordinate2)
+                p2.getCoordinate(0) *
+                p1.getCoordinate(1)
             )
         )
 
-        if(vectorProduct < 0):
+        if (vectorProduct < 0):
             return -1
-        elif(vectorProduct > 0):
+        elif (vectorProduct > 0):
             return 1
         else:
             return 0
@@ -147,28 +147,28 @@ class Segment:
         d3: int = Segment.direction2D(coordinate1, coordinate2, q1q2, q1p1)
         d4: int = Segment.direction2D(coordinate1, coordinate2, q1q2, q1p2)
 
-        if((d1*d2 == -1) and (d3*d4 == -1)):
+        if ((d1*d2 == -1) and (d3*d4 == -1)):
             return True
 
-        elif((d1 == 0) and (Segment.onBounds(p1p2, q1))):
+        elif ((d1 == 0) and (Segment.onBounds(p1p2, q1))):
             return True
-        elif((d2 == 0) and (Segment.onBounds(p1p2, q2))):
+        elif ((d2 == 0) and (Segment.onBounds(p1p2, q2))):
             return True
-        elif((d3 == 0) and (Segment.onBounds(q1q2, p1))):
+        elif ((d3 == 0) and (Segment.onBounds(q1q2, p1))):
             return True
-        elif((d4 == 0) and (Segment.onBounds(q1q2, p2))):
+        elif ((d4 == 0) and (Segment.onBounds(q1q2, p2))):
             return True
         else:
             return False
 
     def __str__(self) -> str:
-        return self.points[0].__str__() + ", " + self.points[1].__str__()
+        return self.__points[0].__str__() + ", " + self.__points[1].__str__()
 
     def slope(self, coordinate1: int, coordinate2: int) -> float:
-        if(self.getPointCoordinate(1, coordinate1) == self.getPointCoordinate(0, coordinate1)):
+        if (self.getPointCoordinate(1, coordinate1) == self.getPointCoordinate(0, coordinate1)):
             return np.inf
 
-        elif(self.getPointCoordinate(1, coordinate2) == self.getPointCoordinate(0, coordinate2)):
+        elif (self.getPointCoordinate(1, coordinate2) == self.getPointCoordinate(0, coordinate2)):
             return 0
 
         else:
@@ -178,7 +178,7 @@ class Segment:
                  self.getPointCoordinate(0, coordinate1))
 
     def internalProduct(self, segment: Segment) -> float:
-        errorAssert(self.dim == segment.getDim(),
+        errorAssert(self.__dim == segment.getDim(),
                     "Segments of different dimensions.")
 
         v1 = (self.getPoint(1) - self.getPoint(0))
@@ -199,7 +199,43 @@ class Segment:
         return Point(median)
 
     def getPointOrder(self, index: int, coordinate: int) -> int:
-        errorAssert(coordinate < self.dim, "Invalid coordinate.")
+        errorAssert(coordinate < self.__dim, "Invalid coordinate.")
         errorAssert(index == 0 or index == 1, "Invalid index.")
 
-        return self.points[index].compare(self.points[(index + 1) % 2], coordinate)
+        return self.__points[index].compare(self.__points[(index + 1) % 2], coordinate)
+
+    def getLeftEndpoint(self, coordinate: int) -> Point:
+        if (self.getPointOrder(0, coordinate) == -1):
+            return self.__points[0]
+        else:
+            return self.__points[1]
+
+    def getRightEndpoint(self, coordinate: int) -> Point:
+        if (self.getPointOrder(0, coordinate) == 1):
+            return self.__points[0]
+        else:
+            return self.__points[1]
+
+    def proportionalDistance(self, point: Point, coordinate1: int, coordinate2: int) -> float:
+        errorAssert((coordinate1 < self.__dim) and (
+            coordinate2 < self.__dim), "Invalid coordinates")
+
+        return np.abs(
+            (point.getCoordinate(coordinate2) - self.__points[0].getCoordinate(coordinate2)) *
+            (self.__points[1].getCoordinate(coordinate1) - self.__points[0].getCoordinate(coordinate1)) -
+            (self.__points[1].getCoordinate(coordinate2) - self.__points[0].getCoordinate(coordinate2)) *
+            (point.getCoordinate(coordinate1) -
+             self.__points[0].getCoordinate(coordinate1))
+        )
+
+    def getSide(self, point: Point, coordinate1: int, coordinate2: int) -> int:
+        errorAssert((coordinate1 < self.__dim) and (
+            coordinate2 < self.__dim), "Invalid coordinates")
+
+        if (self.__points[0].getCoordinate(coordinate2) < self.__points[1].getCoordinate(coordinate2)):
+            s = Segment(self.__points[0], point)
+
+        else:
+            s = Segment(self.__points[1], point)
+
+        return Segment.direction2D(coordinate1, coordinate2, s, self)

@@ -1,1 +1,1 @@
-from .exception import errorAssert, throwException
+from .exception import errorAssert, throwException, warningAssert, throwWarning

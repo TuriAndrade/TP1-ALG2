@@ -1,10 +1,9 @@
 from ..segment import Segment, SegmentPoint
 from ..point import Point
-from ..line import Line2D
 from ..AVLTree import AVLTree
 from ..quicksort import quicksort
 from utils.exception.exception import errorAssert
-from typing import List, Any
+from typing import List
 
 
 class IntersectionChecker:
@@ -16,122 +15,82 @@ class IntersectionChecker:
         errorAssert((coordinate1 < segments[0].getDim()) and (
             coordinate2 < segments[0].getDim()), "Invalid coordinates.")
 
-        self.segments: List[Segment] = segments
-        self.points: List[SegmentPoint] = []
+        self.__segments: List[Segment] = segments
+        self.__points: List[SegmentPoint] = []
 
-        for segment in self.segments:
-            self.points.append(SegmentPoint(segment, 0, 0))
-            self.points.append(SegmentPoint(segment, 1, 0))
+        for segment in self.__segments:
+            self.__points.append(SegmentPoint(segment, 0))
+            self.__points.append(SegmentPoint(segment, 1))
 
-        self.coordinate1 = coordinate1
-        self.coordinate2 = coordinate2
+        self.__coordinate1 = coordinate1
+        self.__coordinate2 = coordinate2
 
-        self.sweepLineStatus = AVLTree()
-
-    def buildSweepLineComparsion(self, point: Point) -> Any:
-        errorAssert(point is not None, "Invalid point.")
-
-        def compare(segment1: Segment, segment2: Segment) -> int:
-            errorAssert(segment1.getDim() ==
-                        segment2.getDim(), "Invalid segments.")
-            errorAssert(point.getDim() == segment1.getDim(), "Invalid point.")
-
-            x = point.getCoordinate(self.coordinate1)
-
-            line1 = Line2D(
-                self.coordinate1, self.coordinate2,
-                point1=segment1.getPoint(0), point2=segment1.getPoint(1)
-            )
-            y1 = line1.equation(x)
-
-            line2 = Line2D(
-                self.coordinate1, self.coordinate2,
-                point1=segment2.getPoint(0), point2=segment2.getPoint(1)
-            )
-            y2 = line2.equation(x)
-
-            if(y1 < y2):
-                return -1
-            elif(y1 > y2):
-                return 1
-            elif(segment1 == segment2):
-                return 0
-            else:
-                if(segment1.computeLength() < segment2.computeLength()):
-                    return -1
-
-                elif(segment1.computeLength() > segment2.computeLength()):
-                    return 1
-
-                else:
-                    if(segment1.getPointCoordinate(0, self.coordinate1) < segment2.getPointCoordinate(0, self.coordinate1)):
-                        return -1
-                    elif(segment1.getPointCoordinate(0, self.coordinate1) > segment2.getPointCoordinate(0, self.coordinate1)):
-                        return 1
-                    elif(segment1.getPointCoordinate(1, self.coordinate1) < segment2.getPointCoordinate(1, self.coordinate1)):
-                        return -1
-                    elif(segment1.getPointCoordinate(1, self.coordinate1) > segment2.getPointCoordinate(1, self.coordinate1)):
-                        return 1
-                    elif(segment1.getPointCoordinate(0, self.coordinate2) < segment2.getPointCoordinate(0, self.coordinate2)):
-                        return -1
-                    elif(segment1.getPointCoordinate(0, self.coordinate2) > segment2.getPointCoordinate(0, self.coordinate2)):
-                        return 1
-                    elif(segment1.getPointCoordinate(1, self.coordinate2) < segment2.getPointCoordinate(1, self.coordinate2)):
-                        return -1
-                    else:
-                        return 1
-
-        return compare
+        self.__sweepLineStatus = AVLTree()
 
     def run(self) -> bool:
-        quicksort(self.points, 0, len(self.points) - 1,
-                  Point.buildPointsComparison(self.coordinate1))
+        quicksort(self.__points, 0, len(self.__points) - 1,
+                  Point.buildPointsComparison(self.__coordinate1, type='LE'))
 
-        for point in self.points:
-            if(point.isLeftEndpoint()):
-                segment = point.getSegment()
-
-                self.sweepLineStatus.insert(
-                    segment, self.buildSweepLineComparsion(point)
+        for point in self.__points:
+            if (point.isLeftEndpoint(self.__coordinate1)):
+                self.__sweepLineStatus.insert(
+                    point, Point.buildPointsComparison(
+                        self.__coordinate2, type='RAW')
                 )
 
-                above: Segment = self.sweepLineStatus.successor(
-                    segment, self.buildSweepLineComparsion(point))
-                below: Segment = self.sweepLineStatus.predecessor(
-                    segment, self.buildSweepLineComparsion(point))
+                abovePoint: SegmentPoint = self.__sweepLineStatus.successor(
+                    point, Point.buildPointsComparison(
+                        self.__coordinate2, type='RAW'))
+                belowPoint: SegmentPoint = self.__sweepLineStatus.predecessor(
+                    point, Point.buildPointsComparison(
+                        self.__coordinate2, type='RAW'))
 
-                if(
-                    (above is not None) and
-                    (Segment.intersects2D(self.coordinate1,
-                     self.coordinate2, above, segment))
+                aboveSegment: Segment = None if not abovePoint else abovePoint.getSegment()
+                belowSegment: Segment = None if not belowPoint else belowPoint.getSegment()
+
+                currentSegment: Segment = point.getSegment()
+
+                if (
+                    (aboveSegment is not None) and
+                    (Segment.intersects2D(self.__coordinate1,
+                     self.__coordinate2, aboveSegment, currentSegment))
                 ):
                     return True
 
-                elif(
-                    (below is not None) and
-                    (Segment.intersects2D(self.coordinate1,
-                     self.coordinate2, below, segment))
+                elif (
+                    (belowSegment is not None) and
+                    (Segment.intersects2D(self.__coordinate1,
+                     self.__coordinate2, belowSegment, currentSegment))
                 ):
                     return True
 
-            if(point.isRightEndpoint()):
-                segment = point.getSegment()
+            if (point.isRightEndpoint(self.__coordinate1)):
+                abovePoint: SegmentPoint = self.__sweepLineStatus.successor(
+                    point, Point.buildPointsComparison(
+                        self.__coordinate2, type='RAW'))
+                belowPoint: SegmentPoint = self.__sweepLineStatus.predecessor(
+                    point, Point.buildPointsComparison(
+                        self.__coordinate2, type='RAW'))
 
-                above: Segment = self.sweepLineStatus.successor(
-                    segment, self.buildSweepLineComparsion(point))
-                below: Segment = self.sweepLineStatus.predecessor(
-                    segment, self.buildSweepLineComparsion(point))
+                aboveSegment: Segment = None if not abovePoint else abovePoint.getSegment()
+                belowSegment: Segment = None if not belowPoint else belowPoint.getSegment()
 
-                if(
-                    (above is not None) and
-                    (below is not None) and
-                    (Segment.intersects2D(self.coordinate1,
-                     self.coordinate2, above, below))
+                currentSegment: Segment = point.getSegment()
+
+                if (
+                    (aboveSegment is not None) and
+                    (belowSegment is not None) and
+                    (Segment.intersects2D(self.__coordinate1,
+                     self.__coordinate2, aboveSegment, belowSegment))
                 ):
                     return True
 
-                self.sweepLineStatus.delete(
-                    segment, self.buildSweepLineComparsion(point)
+                leftEndpoint: Point = currentSegment.getLeftEndpoint(
+                    self.__coordinate1)
+
+                self.__sweepLineStatus.delete(
+                    leftEndpoint, Point.buildPointsComparison(
+                        self.__coordinate2, type='RAW')
                 )
 
         return False

@@ -6,18 +6,18 @@ from typing import Any
 class StackNode:
     def __init__(self, data: Any):
         errorAssert(data is not None, "Invalid data for stack node.")
-        self.data: Any = data
-        self.next: StackNode = None
+        self.__data: Any = data
+        self.__next: StackNode = None
 
     def getNext(self) -> StackNode:
-        return self.next
+        return self.__next
 
     def setNext(self, node: StackNode) -> None:
-        self.next = node
+        self.__next = node
 
     def getData(self) -> Any:
-        return self.data
+        return self.__data
 
     def setData(self, data) -> Any:
         errorAssert(data is not None, "Invalid data for stack node.")
-        self.data = data
+        self.__data = data

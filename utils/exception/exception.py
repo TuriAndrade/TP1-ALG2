@@ -1,37 +1,53 @@
 from traceback import StackSummary, extract_stack
-import sys
 
 
 def errorAssert(condition: bool, msg: str) -> None:
-    if(not condition):
-        print("Error: " + msg)
-        print("Traceback stack:")
-
-        errorStack: StackSummary = extract_stack()
-        printErrorStack(errorStack)
-        sys.exit()
+    if (not condition):
+        raise Exception(msg)
 
 
 def throwException(msg: str) -> None:
-    print("Error: " + msg)
+    raise Exception(msg)
+
+
+def warningAssert(condition: bool, msg: str) -> None:
+    if (not condition):
+        print()
+        print("Warning: " + msg)
+        print("Traceback stack:")
+
+        warningStack: StackSummary = extract_stack()
+        printStack(warningStack)
+        print()
+
+
+def throwWarning(msg: str) -> None:
+    print()
+    print("Warning: " + msg)
     print("Traceback stack:")
 
-    errorStack: StackSummary = extract_stack()
-    printErrorStack(errorStack)
-    sys.exit()
+    warningStack: StackSummary = extract_stack()
+    printStack(warningStack)
+    print()
 
 
-def printErrorStack(errorStack: StackSummary, limit: int = -2) -> None:
+def printStack(errorStack: StackSummary, limit: int = -2, length: int = 2) -> None:
     errorStackLen = len(errorStack)
 
-    if(limit is None or limit > errorStackLen):
-        if(limit is None):
+    if (length is None or length < 0):
+        length = 0
+
+    elif (length > errorStackLen):
+        length = errorStackLen
+
+    if (limit is None or limit >= 0):
+        if (limit is None):
             limit = errorStackLen
 
-        elif(limit > errorStackLen):
+        elif (limit > errorStackLen):
             limit = errorStackLen
 
-        for i in range(limit):
+        for i in range(limit - length, limit):
             print(
                 "-----------------------------------------------------------------------")
             print("File: " + str(errorStack[i][0]))
@@ -39,7 +55,7 @@ def printErrorStack(errorStack: StackSummary, limit: int = -2) -> None:
             print("Call: " + str(errorStack[i][3]))
 
     else:
-        for i in range(errorStackLen + limit):
+        for i in range(errorStackLen + limit - length, errorStackLen + limit):
             print(
                 "-----------------------------------------------------------------------")
             print("File: " + str(errorStack[i][0]))

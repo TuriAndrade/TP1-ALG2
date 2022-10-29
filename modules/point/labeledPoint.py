@@ -9,14 +9,14 @@ import numpy as np
 class LabeledPoint(Point):
     def __init__(self, coordinates: NDArray[np.float32], label: int = None) -> None:
         super().__init__(coordinates)
-        self.label = label
+        self.__label = label
 
     def getLabel(self) -> int:
-        return self.label
+        return self.__label
 
     def setLabel(self, label) -> None:
         errorAssert(label is not None, "Invalid label.")
-        self.label = label
+        self.__label = label
 
     @staticmethod
     def getLabeledSet(labeledPoints: List[LabeledPoint], label: int) -> None:
@@ -26,10 +26,10 @@ class LabeledPoint(Point):
         pointsOfInterest: List[LabeledPoint] = []
 
         for point in labeledPoints:
-            if(point.getLabel() == label):
+            if (point.getLabel() == label):
                 pointsOfInterest.append(point)
 
         return pointsOfInterest
 
     def __str__(self) -> str:
-        return str(self.coordinates) + " " + str(self.label)
+        return str(self._coordinates) + " " + str(self.__label)

@@ -6,9 +6,9 @@ class MaxHeap:
     def __init__(self, capacity: int) -> None:
         errorAssert(capacity > 0, "Invalid capacity.")
 
-        self.capacity: int = capacity
-        self.size: int = 0
-        self.heap: List[Tuple[Any, Any]] = [None] * self.capacity
+        self.__capacity: int = capacity
+        self.__size: int = 0
+        self.__heap: List[Tuple[Any, Any]] = [None] * self.__capacity
 
     def parent(self, position: int) -> int:
         return (position - 1)//2
@@ -20,29 +20,29 @@ class MaxHeap:
         return (2*position) + 2
 
     def insert(self, node: Tuple[Any, Any]) -> None:
-        if(self.size < self.capacity):
-            self.size += 1
-            position: int = self.size - 1
-            self.heap[position] = node
+        if (self.__size < self.__capacity):
+            self.__size += 1
+            position: int = self.__size - 1
+            self.__heap[position] = node
 
-            while (position != 0 and self.heap[self.parent(position)][1] < self.heap[position][1]):
-                (self.heap[position], self.heap[self.parent(position)]) = (
-                    self.heap[self.parent(position)], self.heap[position])
+            while (position != 0 and self.__heap[self.parent(position)][1] < self.__heap[position][1]):
+                (self.__heap[position], self.__heap[self.parent(position)]) = (
+                    self.__heap[self.parent(position)], self.__heap[position])
 
                 position = self.parent(position)
 
-        elif(node[1] < self.heap[0][1]):
-            self.heap[0] = node
-            self.heapify(0, self.size)
+        elif (node[1] < self.__heap[0][1]):
+            self.__heap[0] = node
+            self.heapify(0, self.__size)
 
     def decreaseKey(self, position: int, newNode: Any) -> None:
-        errorAssert(position < self.capacity, "Invalid position.")
+        errorAssert(position < self.__capacity, "Invalid position.")
 
-        self.heap[position] = newNode
+        self.__heap[position] = newNode
 
-        while (position != 0 and self.heap[self.parent(position)][1] < self.heap[position][1]):
-            (self.heap[position], self.heap[self.parent(position)]) = (
-                self.heap[self.parent(position)], self.heap[position])
+        while (position != 0 and self.__heap[self.parent(position)][1] < self.__heap[position][1]):
+            (self.__heap[position], self.__heap[self.parent(position)]) = (
+                self.__heap[self.parent(position)], self.__heap[position])
 
             position = self.parent(position)
 
@@ -52,34 +52,34 @@ class MaxHeap:
 
         greatest: int = position
 
-        if(left < size and self.heap[left][1] > self.heap[greatest][1]):
+        if (left < size and self.__heap[left][1] > self.__heap[greatest][1]):
             greatest = left
 
-        if(right < size and self.heap[right][1] > self.heap[greatest][1]):
+        if (right < size and self.__heap[right][1] > self.__heap[greatest][1]):
             greatest = right
 
-        if(greatest != position):
-            (self.heap[position], self.heap[greatest]) = (
-                self.heap[greatest], self.heap[position])
+        if (greatest != position):
+            (self.__heap[position], self.__heap[greatest]) = (
+                self.__heap[greatest], self.__heap[position])
 
             self.heapify(greatest, size)
 
     def build(self) -> None:
-        startIndex: int = (self.size / 2) - 1
+        startIndex: int = (self.__size / 2) - 1
 
         for i in range(startIndex, -1, -1):
-            self.heapify(i, self.size)
+            self.heapify(i, self.__size)
 
     def getMax(self) -> Tuple[Any, Any]:
-        errorAssert(self.size > 0, "Heap vazio.")
-        return self.heap[0]
+        errorAssert(self.__size > 0, "Heap vazio.")
+        return self.__heap[0]
 
     def getSize(self) -> int:
-        return self.size
+        return self.__size
 
     def heapSort(self) -> List[Tuple[Any, Any]]:
-        for i in range(self.size - 1, -1, -1):
-            (self.heap[0], self.heap[i]) = (self.heap[i], self.heap[0])
+        for i in range(self.__size - 1, -1, -1):
+            (self.__heap[0], self.__heap[i]) = (self.__heap[i], self.__heap[0])
             self.heapify(0, i)
 
-        return self.heap
+        return self.__heap

@@ -18,100 +18,101 @@ class Line2D:
         errorAssert((slope is not None) or (point2 is not None),
                     "Line need slope and point or 2 points.")
 
-        self.coordinate1: int = coordinate1
-        self.coordinate2: int = coordinate2
-        self.point1: Point = point1
-        self.point2: Point = point2
-        self.vertical: bool = False
-        self.horizontal: bool = False
-        self.slope = slope
-        self.verticalCross: float = None
-        self.horizontalCross: float = None
+        self.__coordinate1: int = coordinate1
+        self.__coordinate2: int = coordinate2
+        self.__point1: Point = point1
+        self.__point2: Point = point2
+        self.__vertical: bool = False
+        self.__horizontal: bool = False
+        self.__slope = slope
+        self.__verticalCross: float = None
+        self.__horizontalCross: float = None
 
-        if(self.slope is None):
-            self.segment = Segment(self.point1, self.point2)
-            self.slope: float = self.computeSlope()
+        if (self.__slope is None):
+            self.segment = Segment(self.__point1, self.__point2)
+            self.__slope: float = self.computeSlope()
 
-        if(np.isinf(self.slope)):
-            self.vertical = True
-            self.verticalCross: float = point1.getCoordinate(coordinate1)
+        if (np.isinf(self.__slope)):
+            self.__vertical = True
+            self.__verticalCross: float = point1.getCoordinate(coordinate1)
         else:
             self.c: float = point1.getCoordinate(
-                coordinate2) - self.slope*point1.getCoordinate(coordinate1)
+                coordinate2) - self.__slope*point1.getCoordinate(coordinate1)
 
-            if(self.slope == 0):
-                self.horizontal = True
-                self.horizontalCross: float = point1.getCoordinate(coordinate2)
+            if (self.__slope == 0):
+                self.__horizontal = True
+                self.__horizontalCross: float = point1.getCoordinate(
+                    coordinate2)
 
     def computeSlope(self) -> float:
-        if(self.slope is None):
-            return self.segment.slope(self.coordinate1, self.coordinate2)
+        if (self.__slope is None):
+            return self.segment.slope(self.__coordinate1, self.__coordinate2)
         else:
-            return self.slope
+            return self.__slope
 
     def isVertical(self) -> Tuple[bool, float]:
-        return self.vertical, self.verticalCross
+        return self.__vertical, self.__verticalCross
 
     def isHorizontal(self) -> Tuple[bool, float]:
-        return self.horizontal, self.horizontalCross
+        return self.__horizontal, self.__horizontalCross
 
     def equation(self, coord1Init) -> float:
-        if(self.vertical):
-            if(coord1Init == self.point1.getCoordinate(self.coordinate1)):
+        if (self.__vertical):
+            if (coord1Init == self.__point1.getCoordinate(self.__coordinate1)):
                 return np.inf
             else:
                 return np.nan
 
-        elif(self.horizontal):
-            return self.point1.getCoordinate(self.coordinate2)
+        elif (self.__horizontal):
+            return self.__point1.getCoordinate(self.__coordinate2)
 
         else:
-            return self.slope*coord1Init + self.c
+            return self.__slope*coord1Init + self.c
 
     def perpendicularLine(self, point: Point = None) -> Line2D:
         errorAssert((point is not None) or (
-            self.point2 is not None), "Point is necessary.")
+            self.__point2 is not None), "Point is necessary.")
 
-        if(self.vertical):
-            if(point is not None):
-                return Line2D(self.coordinate1, self.coordinate2, point, slope=0)
-
-            else:
-                medianPoint = self.segment.median()
-                return Line2D(self.coordinate1, self.coordinate2, medianPoint, slope=0)
-
-        elif(self.horizontal):
-            if(point is not None):
-                return Line2D(self.coordinate1, self.coordinate2, point, slope=np.inf)
+        if (self.__vertical):
+            if (point is not None):
+                return Line2D(self.__coordinate1, self.__coordinate2, point, slope=0)
 
             else:
                 medianPoint = self.segment.median()
-                return Line2D(self.coordinate1, self.coordinate2, medianPoint, slope=np.inf)
+                return Line2D(self.__coordinate1, self.__coordinate2, medianPoint, slope=0)
+
+        elif (self.__horizontal):
+            if (point is not None):
+                return Line2D(self.__coordinate1, self.__coordinate2, point, slope=np.inf)
+
+            else:
+                medianPoint = self.segment.median()
+                return Line2D(self.__coordinate1, self.__coordinate2, medianPoint, slope=np.inf)
 
         else:
-            negSlope = -1/self.slope
+            negSlope = -1/self.__slope
 
-            if(point is not None):
-                return Line2D(self.coordinate1, self.coordinate2, point, slope=negSlope)
+            if (point is not None):
+                return Line2D(self.__coordinate1, self.__coordinate2, point, slope=negSlope)
 
             else:
                 medianPoint = self.segment.median()
-                return Line2D(self.coordinate1, self.coordinate2, medianPoint, slope=negSlope)
+                return Line2D(self.__coordinate1, self.__coordinate2, medianPoint, slope=negSlope)
 
     def getPointSide(self, point: Point) -> int:
-        if(self.vertical):
-            if(point.getCoordinate(self.coordinate1) < self.point1.getCoordinate(self.coordinate1)):
+        if (self.__vertical):
+            if (point.getCoordinate(self.__coordinate1) < self.__point1.getCoordinate(self.__coordinate1)):
                 return -1
-            elif(point.getCoordinate(self.coordinate1) == self.point1.getCoordinate(self.coordinate1)):
+            elif (point.getCoordinate(self.__coordinate1) == self.__point1.getCoordinate(self.__coordinate1)):
                 return 0
             else:
                 return 1
         else:
-            lineY = self.equation(point.getCoordinate(self.coordinate1))
+            lineY = self.equation(point.getCoordinate(self.__coordinate1))
 
-            if(point.getCoordinate(self.coordinate2) < lineY):
+            if (point.getCoordinate(self.__coordinate2) < lineY):
                 return -1
-            elif(point.getCoordinate(self.coordinate2) == lineY):
+            elif (point.getCoordinate(self.__coordinate2) == lineY):
                 return 0
             else:
                 return 1
@@ -125,18 +126,18 @@ class Line2D:
         ps1 = self.getPointSide(pointSet1[0])
         ps2 = self.getPointSide(pointSet2[0])
 
-        if(ps1 == ps2):
+        if (ps1 == ps2):
             return False
 
         else:
-            if(ps1 < 0):
+            if (ps1 < 0):
                 belowSet = pointSet1
                 aboveSet = pointSet2
-            elif(ps1 > 0):
+            elif (ps1 > 0):
                 belowSet = pointSet2
                 aboveSet = pointSet1
-            elif(ps1 == 0):
-                if(ps2 < 0):
+            elif (ps1 == 0):
+                if (ps2 < 0):
                     belowSet = pointSet2
                     aboveSet = pointSet1
                 else:
@@ -146,13 +147,13 @@ class Line2D:
         for i in range(1, len(belowSet)):
             psb = self.getPointSide(belowSet[i])
 
-            if(psb > -1):
+            if (psb > -1):
                 return False
 
         for i in range(1, len(aboveSet)):
             psa = self.getPointSide(aboveSet[i])
 
-            if(psa < 0):
+            if (psa < 0):
                 return False
 
         return True

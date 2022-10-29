@@ -24,7 +24,7 @@ def partition(arr: List[Any], start: int, stop: int, pivotIndex: int, compare: A
 
 
 def quicksort(arr: Any, start: int, stop: int, compare: Any) -> None:
-    if(start < stop):
+    if (start < stop):
 
         randPivot: int = randrange(start, stop)
 
